@@ -54,14 +54,20 @@ def generate_graph_seq2seq_io_data(
 
 
 def generate_train_val_test(args):
-    df = pd.read_hdf(args.traffic_df_filename)
+    if len(args.csv_filename) > 0:
+        df = pd.read_csv(args.csv_filename)
+        df.index = pd.DatetimeIndex(df["date"].values)
+        df = df.drop(["date"], axis=1)
+    else:
+        df = pd.read_hdf(args.traffic_df_filename)
     # 0 is the latest observed sample.
+    window_size = 12
     x_offsets = np.sort(
         # np.concatenate(([-week_size + 1, -day_size + 1], np.arange(-11, 1, 1)))
-        np.concatenate((np.arange(-11, 1, 1),))
+        np.concatenate((np.arange(-window_size+1, 1, 1),))
     )
     # Predict the next one hour
-    y_offsets = np.sort(np.arange(1, 13, 1))
+    y_offsets = np.sort(np.arange(1, window_size+1, 1))
     # x: (num_samples, input_length, num_nodes, input_dim)
     # y: (num_samples, output_length, num_nodes, output_dim)
     x, y = generate_graph_seq2seq_io_data(
@@ -110,13 +116,22 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, choices=['METRLA', 'PEMSBAY'], default='METRLA', help='which dataset to run')
+    parser.add_argument('--dataset', type=str, choices=['METRLA', 'PEMSBAY', 'SOLAR', 'NYT', 'WEATHER', 'OTHER'], default='METRLA', help='which dataset to run')
     parser.add_argument("--output_dir", type=str, default="METRLA/", help="Output directory.")
     parser.add_argument("--traffic_df_filename", type=str, default="METRLA/metr-la.h5", help="Raw traffic readings.")
+    parser.add_argument("--csv_filename", type=str,  help="Raw csv data.")
+    args = parser.parse_args()
     args = parser.parse_args()
     args.output_dir = f'{args.dataset}/'
     if args.dataset == 'METRLA':
         args.traffic_df_filename = f'{args.dataset}/metr-la.h5'
     elif args.dataset == 'PEMSBAY':
         args.traffic_df_filename = f'{args.dataset}/pems-bay.h5'
+    elif args.dataset == 'SOLAR':
+        args.csv_filename = f'{args.dataset}/solar.csv'
+    elif args.dataset == 'NYT':
+        args.csv_filename = f'{args.dataset}/nyt.csv'
+    elif args.dataset == 'WEATHER':
+        args.csv_filename = f'{args.dataset}/weather.csv'
+
     main(args)

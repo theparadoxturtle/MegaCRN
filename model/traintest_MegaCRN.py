@@ -151,12 +151,13 @@ def traintest_model():
     
     logger.info('=' * 35 + 'Best model performance' + '=' * 35)
     model = get_model()
+    print(modelpt_path)
     model.load_state_dict(torch.load(modelpt_path))
     test_loss, _, _ = evaluate(model, 'test')
 
 #########################################################################################    
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', type=str, choices=['METRLA', 'PEMSBAY'], default='METRLA', help='which dataset to run')
+parser.add_argument('--dataset', type=str, choices=['METRLA', 'PEMSBAY', 'SOLAR', 'NYT', 'WEATHER', 'OTHER'], default='METRLA', help='which dataset to run')
 parser.add_argument('--trainval_ratio', type=float, default=0.8, help='the ratio of training and validation data among the total')
 parser.add_argument('--val_ratio', type=float, default=0.125, help='the ratio of validation data among the trainval ratio')
 parser.add_argument('--num_nodes', type=int, default=207, help='num_nodes')
@@ -193,6 +194,13 @@ if args.dataset == 'METRLA':
 elif args.dataset == 'PEMSBAY':
     data_path = f'../{args.dataset}/pems-bay.h5'
     args.num_nodes = 325
+# Can hard code num_nodes for these
+elif args.dataset == 'SOLAR':
+    args.num_nodes = 137
+elif args.dataset == 'NYT':
+    args.num_nodes = 134
+elif args.dataset == 'WEATHER':
+    args.num_nodes = 21
 else:
     pass # including more datasets in the future    
 

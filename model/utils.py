@@ -123,8 +123,13 @@ def masked_mape(preds, labels, null_val=1e-3):
     return torch.mean(loss)
 
 # DCRNN
+def get_mask(y_true):
+    # return (y_true !=0).float()
+    # mask small values not just 0
+    return (y_true > 1e-5).float()
+
 def masked_mae_loss(y_pred, y_true):
-    mask = (y_true != 0).float()
+    mask = get_mask(y_true)
     mask /= mask.mean()
     loss = torch.abs(y_pred - y_true)
     loss = loss * mask
@@ -133,7 +138,7 @@ def masked_mae_loss(y_pred, y_true):
     return loss.mean()
 
 def masked_mape_loss(y_pred, y_true):
-    mask = (y_true != 0).float()
+    mask = get_mask(y_true)
     mask /= mask.mean()
     loss = torch.abs(torch.div(y_true - y_pred, y_true))
     loss = loss * mask
@@ -142,7 +147,7 @@ def masked_mape_loss(y_pred, y_true):
     return loss.mean()
 
 def masked_rmse_loss(y_pred, y_true):
-    mask = (y_true != 0).float()
+    mask = get_mask(y_true)
     mask /= mask.mean()
     loss = torch.pow(y_true - y_pred, 2)
     loss = loss * mask
@@ -151,7 +156,7 @@ def masked_rmse_loss(y_pred, y_true):
     return torch.sqrt(loss.mean())
 
 def masked_mse_loss(y_pred, y_true):
-    mask = (y_true != 0).float()
+    mask = get_mask(y_true)
     mask /= mask.mean()
     loss = torch.pow(y_true - y_pred, 2)
     loss = loss * mask

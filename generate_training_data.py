@@ -54,7 +54,7 @@ def generate_graph_seq2seq_io_data(
 
 
 def generate_train_val_test(args):
-    if len(args.csv_filename) > 0:
+    if args.csv_filename is not None and len(args.csv_filename) > 0:
         df = pd.read_csv(args.csv_filename)
         df.index = pd.DatetimeIndex(df["date"].values)
         df = df.drop(["date"], axis=1)
